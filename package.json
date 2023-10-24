@@ -17,7 +17,7 @@
         "workflow:archive": "pnpm install && open /Applications/Docker.app && cross-var pnpm exec gh act --workflows  ./workflows/workflow-build.yml --reuse",
         "\n========== CODE STYLE >> ==========": "",
         "lint": "cross-var eslint \"$npm_package_config_eslint_path.{$npm_package_config_eslint_extensions}\" -c $npm_package_config_eslint_config",
-        "prettier": "cross-var prettier {$npm_package_config_prettier_path}.{$npm_package_config_prettier_extensions} --ignore-path .prettierignore",
+        "prettier": "cross-var prettier {$npm_package_config_prettier_path}.{$npm_package_config_prettier_extensions} --ignore-path .prettierignore --write",
         "\n========== CHECK >> ==========": "",
         "check": "pnpm check:self && pnpm -r check",
         "check:self": "pnpm lint",
@@ -41,25 +41,25 @@
     "license": "ISC",
     "devDependencies": {
         "@changesets/cli": "^2.26.2",
-        "@commitlint/cli": "^17.7.1",
-        "@commitlint/config-conventional": "^17.7.0",
-        "@commitlint/cz-commitlint": "^17.7.1",
-        "@shopify/cli": "^3.49.7",
-        "@shopify/theme": "^3.49.7",
+        "@commitlint/cli": "^18.0.0",
+        "@commitlint/config-conventional": "^18.0.0",
+        "@commitlint/cz-commitlint": "^18.0.0",
+        "@shopify/cli": "^3.50.0",
+        "@shopify/theme": "^3.50.0",
         "@snailicide/build-config": "^0.2.6",
-        "@types/node": "^20.6.2",
+        "@types/node": "^20.8.8",
         "commitizen": "^4.3.0",
         "cross-var": "^1.1.0",
-        "eslint": "^8.49.0",
+        "eslint": "^8.52.0",
         "git-branch-is": "^4.0.0",
         "husky": "^8.0.3",
-        "lint-staged": "^14.0.1",
+        "lint-staged": "^15.0.2",
         "prettier": "^3.0.3",
         "typescript": "^5.2.2"
     },
     "lint-staged": {
-        "*{sh,ts,js,cjs,mjs,cts,json,yaml,yml,graphql,md}": "pnpm run prettier",
-        "*.{ts,js,cjs,mjs}": "eslint -c .eslintrc.cjs"
+        "./*.{sh,ts,js,cjs,mjs,cts,json,yaml,yml,graphql,md}": "pnpm run prettier --write",
+        "./*.{ts,js,cjs,mjs}": "eslint -c .eslintrc.cjs"
     },
     "prettier": "@snailicide/build-config/prettier",
     "eslintIgnore": [
@@ -68,7 +68,7 @@
     "config": {
         "eslint": {
             "extensions": "ts,js,cjs,mjs",
-            "path": "*",
+            "path": "./*",
             "config": ".eslintrc.cjs"
         },
         "prettier": {
