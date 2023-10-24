@@ -9,7 +9,7 @@ const getSchema = () => {
         {
             name: 'theme_info',
             theme_name: 'Dawn',
-            theme_version: '0.0.1',//packageFile.version,
+            theme_version: '0.0.1', //packageFile.version,
             theme_author: 'Shopify',
             theme_documentation_url:
                 'https://help.shopify.com/manual/online-store/themes',

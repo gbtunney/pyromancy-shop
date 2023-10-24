@@ -1,5 +1,5 @@
-<div class="page-width">
-  <div class="flex flex--grid flex--no-gutter">
+<div class='page-width'>
+  <div class='flex flex--grid flex--no-gutter'>
     {% assign image_size = '680x' %}
     {% case section.blocks.size %}
       {% when 1 %}
@@ -13,17 +13,22 @@
         {% assign flex_size = 'medium-up--one-quarter' %}
     {% endcase %}
     {% for block in section.blocks %}
-      <div class="flex__item flex {{ flex_size }}" {{ block.shopify_attributes }}>
-        <a href="{{ block.settings.link }}" class="link-block" {% if block.settings.image != blank %}style="background-image: url({{ block.settings.image | img_url: image_size | format: 'jpg' }});"{% endif %}>
+      <div class='flex__item flex {{ flex_size }}' {{ block.shopify_attributes }}>
+        <a
+          href='{{ block.settings.link }}'
+          class='link-block'
+          {% if block.settings.image != blank %}
+            style='background-image: url({{ block.settings.image | img_url: image_size | format: 'jpg' }});'
+          {% endif %}>
           {% if block.settings.image == blank %}
             {% capture current %}{% cycle 1, 2 %}{% endcapture %}
-            <div class="placeholder-background">
+            <div class='placeholder-background'>
               {{ 'lifestyle-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
             </div>
           {% endif %}
-          <div class="flex flex--center-vertical">
-            <div class="flex__item">
-              <span class="emphasized-title h1 link-block__cta">
+          <div class='flex flex--center-vertical'>
+            <div class='flex__item'>
+              <span class='emphasized-title h1 link-block__cta'>
                 {{ block.settings.cta_label }}
               </span>
             </div>
@@ -39,47 +44,47 @@
 </div>
 
 {% schema %}
-  {
-    "name": "Multiple link blocks",
-    "class": "index-section",
-    "max_blocks": 10,
-    "blocks": [
-      {
-        "type": "link_block",
-        "name": "Link block",
-        "settings": [
-          {
-            "type": "image_picker",
-            "id": "image",
-            "label": "Image"
-          },
-          {
-            "type": "url",
-            "id": "link",
-            "label": "Link"
-          },
-          {
-            "type": "text",
-            "id": "cta_label",
-            "label": "Link label",
-            "default": "Link label"
-          }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "Multiple link blocks",
-        "category": "Image",
-        "blocks": [
-          {
-            "type": "link_block"
-          },
-          {
-            "type": "link_block"
-          }
-        ]
-      }
-    ]
-  }
+{
+  "name": "Multiple link blocks",
+  "class": "index-section",
+  "max_blocks": 10,
+  "blocks": [
+    {
+      "type": "link_block",
+      "name": "Link block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Link label",
+          "default": "Link label"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Multiple link blocks",
+      "category": "Image",
+      "blocks": [
+        {
+          "type": "link_block"
+        },
+        {
+          "type": "link_block"
+        }
+      ]
+    }
+  ]
+}
 {% endschema %}

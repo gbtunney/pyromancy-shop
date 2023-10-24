@@ -13,7 +13,7 @@
         //  "outDir": "./../types" /* Specify an output folder for all emitted files. */,
         // Output settings.
         "sourceMap": true,
-     //  "rootDir": ".",
+        //  "rootDir": ".",
         "strict": true,
         "jsx": "preserve",
         "isolatedModules": true,

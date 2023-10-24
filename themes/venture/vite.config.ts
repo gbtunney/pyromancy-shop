@@ -123,5 +123,5 @@ export default defineConfig(
         shopify: true,
         emptyOutDir: true,
         outThemeDirectory: './theme',
-    })
+    }),
 )

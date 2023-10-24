@@ -1,4 +1,4 @@
-<div class="page-width">
+<div class='page-width'>
   {% assign blocks_count = section.blocks.size %}
 
   {% case blocks_count %}
@@ -16,13 +16,13 @@
       {% assign grid_item_width = 'medium-up--one-third' %}
   {% endcase %}
 
-  <div class="grid grid--no-gutters">
+  <div class='grid grid--no-gutters'>
     {% for block in section.blocks %}
       {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
       {% if blocks_count == 5 and forloop.index > 3 %}
         {% assign grid_item_width = 'medium-up--one-half' %}
       {% endif %}
-      <div class="grid__item {{ grid_item_width }}" {{ block.shopify_attributes }}>
+      <div class='grid__item {{ grid_item_width }}' {{ block.shopify_attributes }}>
         {% assign featured_collection = collections[block.settings.collection] %}
 
         {% if featured_collection.empty? %}
@@ -37,24 +37,33 @@
           {% endif %}
         {% endif %}
 
-        <a href="{{ featured_collection.url }}" title="{{ 'collections.general.link_title' | t: title: featured_collection.title }}" class="featured-card{% if section.settings.stretch_collection_image %} featured-card--cover{% endif %}"{% if section.settings.stretch_collection_image %} style="background-image: url('{{ image_src }}')"{% endif %}>
+        <a
+          href='{{ featured_collection.url }}'
+          title='{{ 'collections.general.link_title' | t: title: featured_collection.title }}'
+          class='featured-card{% if section.settings.stretch_collection_image %} featured-card--cover{% endif %}'
+          {% if section.settings.stretch_collection_image %}
+            style="background-image: url('{{ image_src }}')"
+          {% endif %}>
           {% if section.settings.stretch_collection_image and featured_collection.empty? %}
-            <div class="placeholder-background">
+            <div class='placeholder-background'>
               {{ 'collection-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
             </div>
           {% endif %}
-          <div class="featured-card__header{% if section.settings.stretch_collection_image %} featured-card__header--background{% endif %}">
-           <p class="h1 featured-card__title">{{ block_title }}</p>
-            <span class="featured-card__action">{{ 'collections.general.view_all' | t }}</span>
+          <div class='featured-card__header{% if section.settings.stretch_collection_image %} featured-card__header--background{% endif %}'>
+            <p class='h1 featured-card__title'>{{ block_title }}</p>
+            <span class='featured-card__action'>{{ 'collections.general.view_all' | t }}</span>
           </div>
           {% unless section.settings.stretch_collection_image %}
-            <div class="featured-card__image-wrapper">
+            <div class='featured-card__image-wrapper'>
               {% if featured_collection.empty? %}
-                <div class="featured-card__image">
+                <div class='featured-card__image'>
                   {{ 'collection-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
                 </div>
               {% else %}
-                <img src="{{ image_src }}" alt="{{ featured_collection.image.alt | escape }}" class="featured-card__image">
+                <img
+                  src='{{ image_src }}'
+                  alt='{{ featured_collection.image.alt | escape }}'
+                  class='featured-card__image'>
               {% endif %}
             </div>
           {% endunless %}
@@ -69,46 +78,46 @@
 </div>
 
 {% schema %}
-  {
-    "name": "Collection list",
-    "class": "index-section",
-    "max_blocks": 6,
-    "settings": [
-      {
-        "type": "checkbox",
-        "id": "stretch_collection_image",
-        "label": "Stretch collection image"
-      }
-    ],
-    "blocks": [
-      {
-        "type": "collection",
-        "name": "Collection",
-        "settings": [
-          {
-            "id": "collection",
-            "type": "collection",
-            "label": "Collection"
-          }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "Collection list",
-        "category": "Collection",
-        "blocks": [
-          {
-            "type": "collection"
-          },
-          {
-            "type": "collection"
-          },
-          {
-            "type": "collection"
-          }
-        ]
-      }
-    ]
-  }
+{
+  "name": "Collection list",
+  "class": "index-section",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "stretch_collection_image",
+      "label": "Stretch collection image"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "id": "collection",
+          "type": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection list",
+      "category": "Collection",
+      "blocks": [
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        }
+      ]
+    }
+  ]
+}
 {% endschema %}

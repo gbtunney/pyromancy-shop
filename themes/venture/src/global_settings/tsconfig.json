@@ -10,7 +10,7 @@
         //"outDir": "./../types" /* Specify an output folder for all emitted files. */,
         // Output settings.
         "sourceMap": true,
-      //  "rootDir": ".",
+        //  "rootDir": ".",
         // Type declaration settings.
         "declaration": true,
         //"declarationDir": "./../types",

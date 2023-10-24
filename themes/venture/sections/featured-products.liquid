@@ -1,5 +1,5 @@
-<div class="page-width">
-  <div class="section-block">
+<div class='page-width'>
+  <div class='section-block'>
     {% assign collection = collections[section.settings.collection] %}
     {% assign rows = section.settings.rows %}
 
@@ -24,33 +24,33 @@
           {% assign product_index_hide_on_mobile = 14 %}
       {% endcase %}
 
-      <div class="grid grid--no-gutters grid--uniform collection">
-        <div class="grid__item small--one-half medium-up--one-fifth collection__cover">
+      <div class='grid grid--no-gutters grid--uniform collection'>
+        <div class='grid__item small--one-half medium-up--one-fifth collection__cover'>
           {% if collection.image %}
             {% assign collection_image = collection | img_url: '480x480' %}
           {% else %}
             {% assign collection_image = collection.products.first | img_url: '480x480' %}
           {% endif %}
-          <a href="{{ collection.url }}" class="collection-card" style="background-image: url({{ collection_image }});">
-            <div class="collection-card__meta">
-              <p class="h1 collection-card__title">{{ collection.title }}</p>
-              <p class="collection-card__subtext">{{ 'collections.general.view_all' | t }}</p>
+          <a href='{{ collection.url }}' class='collection-card' style='background-image: url({{ collection_image }});'>
+            <div class='collection-card__meta'>
+              <p class='h1 collection-card__title'>{{ collection.title }}</p>
+              <p class='collection-card__subtext'>{{ 'collections.general.view_all' | t }}</p>
             </div>
           </a>
         </div>
         {% for product in collection.products limit: product_limit %}
-          <div class="grid__item small--one-half medium-up--one-fifth{% if forloop.index == 1%} collection__card--first{% endif %} {% if mobile_product_limit and forloop.index > 3 %}small--hide{% elsif rows == '1' or rows == '3' %}{% if forloop.index == product_index_hide_on_mobile %}small--hide{% endif %}{% endif %}">
+          <div class='grid__item small--one-half medium-up--one-fifth{% if forloop.index == 1%} collection__card--first{% endif %} {% if mobile_product_limit and forloop.index > 3 %}small--hide{% elsif rows == '1' or rows == '3' %}{% if forloop.index == product_index_hide_on_mobile %}small--hide{% endif %}{% endif %}'>
             {% include 'product-card', product: product, collection: collection %}
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <div class="grid grid--no-gutters grid--uniform collection">
-        <div class="grid__item small--one-half medium-up--one-fifth">
-          <a href="{{ collection_object.url }}" class="collection-card">
-            <div class="collection-card__meta">
-              <p class="h1 collection-card__title">{{ 'homepage.onboarding.collection_title' | t }}</p>
-              <p class="collection-card__subtext">{{ 'collections.general.view_all' | t }}</p>
+      <div class='grid grid--no-gutters grid--uniform collection'>
+        <div class='grid__item small--one-half medium-up--one-fifth'>
+          <a href='{{ collection_object.url }}' class='collection-card'>
+            <div class='collection-card__meta'>
+              <p class='h1 collection-card__title'>{{ 'homepage.onboarding.collection_title' | t }}</p>
+              <p class='collection-card__subtext'>{{ 'collections.general.view_all' | t }}</p>
             </div>
           </a>
         </div>
@@ -65,26 +65,26 @@
             {% else %}
               {% assign index = i %}
           {% endcase %}
-          <div class="grid__item small--one-half medium-up--one-fifth">
+          <div class='grid__item small--one-half medium-up--one-fifth'>
             {% comment %}
               Replica of snippets/product-card.liquid
             {% endcomment %}
-            <a href="#" class="product-card">
-              <div class="product-card__image-wrapper">
-                <div class="product-card__image">
+            <a href='#' class='product-card'>
+              <div class='product-card__image-wrapper'>
+                <div class='product-card__image'>
                   {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
                   {{ 'product-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
                 </div>
               </div>
-              <div class="product-card__info">
-                <div class="product-card__name">{{ 'homepage.onboarding.product_title' | t }}</div>
-                <div class="product-card__price">
-                  $19.99
-                </div>
+              <div class='product-card__info'>
+                <div class='product-card__name'>{{ 'homepage.onboarding.product_title' | t }}</div>
+                <div class='product-card__price'>$19.99</div>
               </div>
-              <div class="product-card__overlay">
+              <div class='product-card__overlay'>
                 {% assign view_string_length = 'products.product.view' | t | size %}
-                <span class="btn product-card__overlay-btn {% if view_string_length > 8 %} btn--narrow{% endif %}">{{ 'products.product.view' | t }}</span>
+                <span class='btn product-card__overlay-btn {% if view_string_length > 8 %} btn--narrow{% endif %}'>
+                  {{- 'products.product.view' | t -}}
+                </span>
               </div>
             </a>
           </div>
@@ -95,41 +95,41 @@
 </div>
 
 {% schema %}
-  {
-    "name": "Featured collection",
-    "class": "index-section",
-    "settings": [
-      {
-        "type": "collection",
-        "id": "collection",
-        "label": "Collection"
-      },
-      {
-        "type": "select",
-        "id": "rows",
-        "label": "Rows",
-        "default": "2",
-        "options": [
-          {
-            "value": "1",
-            "label": "1"
-          },
-          {
-            "value": "2",
-            "label": "2"
-          },
-          {
-            "value": "3",
-            "label": "3"
-          }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "Featured collection",
-        "category": "Collection"
-      }
-    ]
-  }
+{
+  "name": "Featured collection",
+  "class": "index-section",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "select",
+      "id": "rows",
+      "label": "Rows",
+      "default": "2",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        },
+        {
+          "value": "3",
+          "label": "3"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection",
+      "category": "Collection"
+    }
+  ]
+}
 {% endschema %}

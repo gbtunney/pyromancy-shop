@@ -2,10 +2,10 @@
 {%- if collection != blank -%}
   {% if collection.products_count != 0 %}
     <hr>
-    <h3 class="h4">{{ 'layout.sidebar.featured_products' | t }}</h3>
-    <div class="grid grid--no-gutters grid--uniform">
+    <h3 class='h4'>{{ 'layout.sidebar.featured_products' | t }}</h3>
+    <div class='grid grid--no-gutters grid--uniform'>
       {% for product in collection.products limit: 4 %}
-        <div class="grid__item medium-up--one-quarter small--one-half">
+        <div class='grid__item medium-up--one-quarter small--one-half'>
           {% include 'product-card', product: product %}
         </div>
       {% endfor %}
@@ -14,14 +14,14 @@
 {%- endif -%}
 
 {% schema %}
-  {
-    "name": "Featured products",
-    "settings": [
-      {
-        "type": "collection",
-        "id": "collection",
-        "label": "Collection"
-      }
-    ]
-  }
+{
+  "name": "Featured products",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    }
+  ]
+}
 {% endschema %}

@@ -1,25 +1,24 @@
-<div data-section-id="{{ section.id }}" data-section-type="cart">
-  <div class="page-width">
+<div data-section-id='{{ section.id }}' data-section-type='cart'>
+  <div class='page-width'>
     {% if cart.item_count > 0 %}
-
-      <h1 class="small--text-center">{{ 'cart.general.title' | t }}</h1>
-      <form action="/cart" method="post" novalidate class="cart">
-        <table class="responsive-table cart-table">
-          <thead class="cart__row visually-hidden">
-            <th colspan="2">{{ 'cart.label.product' | t }}</th>
+      <h1 class='small--text-center'>{{ 'cart.general.title' | t }}</h1>
+      <form action='/cart' method='post' novalidate class='cart'>
+        <table class='responsive-table cart-table'>
+          <thead class='cart__row visually-hidden'>
+            <th colspan='2'>{{ 'cart.label.product' | t }}</th>
             <th>{{ 'cart.label.quantity' | t }}</th>
             <th>{{ 'cart.label.total' | t }}</th>
           </thead>
-          <tbody id="CartProducts">
+          <tbody id='CartProducts'>
             {% for item in cart.items %}
-              <tr class="cart__row responsive-table__row">
-                <td class="cart__cell--image text-center">
-                  <a href="{{ item.url | within: collections.all }}" class="cart__image">
-                    <img src="{{ item | img_url: '240x240' }}" alt="{{ item.title | escape }}">
+              <tr class='cart__row responsive-table__row'>
+                <td class='cart__cell--image text-center'>
+                  <a href='{{ item.url | within: collections.all }}' class='cart__image'>
+                    <img src='{{ item | img_url: '240x240' }}' alt='{{ item.title | escape }}'>
                   </a>
                 </td>
                 <td>
-                  <a href="{{ item.url }}" class="h5">
+                  <a href='{{ item.url }}' class='h5'>
                     {{ item.product.title }}
                   </a>
                   {% unless item.variant.title contains 'Default' %}
@@ -33,68 +32,81 @@
                       {% unless p.last == blank or first_character_in_key == '_' %}
                         {{ p.first }}:
                         {% if p.last contains '/uploads/' %}
-                          <a href="{{ p.last }}">{{ p.last | split: '/' | last }}</a>
+                          <a href='{{ p.last }}'>{{ p.last | split: '/' | last }}</a>
                         {% else %}
                           {{ p.last }}
                         {% endif %}
-
                       {% endunless %}
                     {% endfor %}
                   {% endif %}
                 </td>
-                <td class="cart__cell--quantity">
-                  <label for="Updates_{{ item.key }}" class="cart__quantity-label medium-up--hide">{{ 'cart.label.quantity' | t }}</label>
-                  <input type="number" name="updates[]" id="Updates_{{ item.key }}" class="cart__quantity" value="{{ item.quantity }}" min="0" data-line="{{ forloop.index }}" aria-label="{{ 'cart.label.quantity' | t }}">
+                <td class='cart__cell--quantity'>
+                  <label for='Updates_{{ item.key }}' class='cart__quantity-label medium-up--hide'>
+                    {{- 'cart.label.quantity' | t -}}
+                  </label>
+                  <input
+                    type='number'
+                    name='updates[]'
+                    id='Updates_{{ item.key }}'
+                    class='cart__quantity'
+                    value='{{ item.quantity }}'
+                    min='0'
+                    data-line='{{ forloop.index }}'
+                    aria-label='{{ 'cart.label.quantity' | t }}'>
                 </td>
-                <td class="cart__cell--total">
+                <td class='cart__cell--total'>
                   {% if item.original_line_price != item.line_price %}
-                    <small class="cart-item__original-price cart__item-total"><s>{{ item.original_line_price | money }}</s></small><br>
+                    <small class='cart-item__original-price cart__item-total'
+                      ><s>{{ item.original_line_price | money }}</s></small
+                    ><br>
                   {% endif %}
-                  <span class="cart__item-total">
+                  <span class='cart__item-total'>
                     {{ item.line_price | money }}
                   </span>
                   {% for discount in item.discounts %}
-                    <p class="cart-item__discount cart__item-total">{{ discount.title }}</p>
+                    <p class='cart-item__discount cart__item-total'>{{ discount.title }}</p>
                   {% endfor %}
                 </td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
-        <div class="grid cart__row">
+        <div class='grid cart__row'>
           {% if section.settings.cart_notes_enable %}
-            <div class="grid__item medium-up--one-half">
-              <label for="CartSpecialInstructions">{{ 'cart.general.note' | t }}</label>
-              <textarea name="note" id="CartSpecialInstructions" class="cart__note">{{ cart.note }}</textarea>
+            <div class='grid__item medium-up--one-half'>
+              <label for='CartSpecialInstructions'>{{ 'cart.general.note' | t }}</label>
+              <textarea name='note' id='CartSpecialInstructions' class='cart__note'>{{ cart.note }}</textarea>
             </div>
           {% endif %}
-          <div class="grid__item cart__buttons text-right small--text-center{% if section.settings.cart_notes_enable %} medium-up--one-half{% endif %}">
-            <p class="h3 cart__subtotal" id="CartSubtotal">{{ cart.total_price | money }}</p>
-            <p id="cartDiscountTotal">
-            {% if cart.total_discounts > 0 %}
-              {% assign savings = cart.total_discounts | money %}
-              {{ 'cart.general.savings_html' | t: price: savings }}
-            {% endif %}
+          <div class='grid__item cart__buttons text-right small--text-center{% if section.settings.cart_notes_enable %} medium-up--one-half{% endif %}'>
+            <p class='h3 cart__subtotal' id='CartSubtotal'>{{ cart.total_price | money }}</p>
+            <p id='cartDiscountTotal'>
+              {% if cart.total_discounts > 0 %}
+                {% assign savings = cart.total_discounts | money %}
+                {{ 'cart.general.savings_html' | t: price: savings }}
+              {% endif %}
             </p>
-            <p class="cart__taxes">{{ 'cart.general.shipping_at_checkout' | t }}</p>
-            <button type="submit" name="update" class="btn--secondary update-cart">{{ 'cart.general.update' | t }}</button>
-            <button type="submit" name="checkout" class="btn">{{ 'cart.general.checkout' | t }}</button>
+            <p class='cart__taxes'>{{ 'cart.general.shipping_at_checkout' | t }}</p>
+            <button type='submit' name='update' class='btn--secondary update-cart'>
+              {{ 'cart.general.update' | t }}
+            </button>
+            <button type='submit' name='checkout' class='btn'>{{ 'cart.general.checkout' | t }}</button>
           </div>
         </div>
       </form>
     {% else %}
-      <div class="page-empty text-center">
+      <div class='page-empty text-center'>
         <h1>{{ 'cart.general.title' | t }}</h1>
         <p>{{ 'cart.general.empty' | t }}</p>
         <hr>
         <p>
-          <a href="/collections/all" class="btn">{{ 'cart.general.continue_browsing' | t }}</a>
+          <a href='/collections/all' class='btn'>{{ 'cart.general.continue_browsing' | t }}</a>
         </p>
       </div>
     {% endif %}
   </div>
 
-  <script id="CartProductTemplate" type="text/template">
+  <script id='CartProductTemplate' type='text/template'>
     {% raw %}
       {{#items}}
       <tr class="cart__row responsive-table__row">
@@ -143,20 +155,20 @@
   </script>
 </div>
 
-<script type="application/json" id="CartJson-{{ section.id }}">
+<script type='application/json' id='CartJson-{{ section.id }}'>
   {{ cart | json }}
 </script>
 
 {% schema %}
-  {
-    "name": "Cart pages",
-    "settings": [
-      {
-        "type": "checkbox",
-        "id": "cart_notes_enable",
-        "label": "Enable order notes",
-        "default": true
-      }
-    ]
-  }
+{
+  "name": "Cart pages",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "cart_notes_enable",
+      "label": "Enable order notes",
+      "default": true
+    }
+  ]
+}
 {% endschema %}

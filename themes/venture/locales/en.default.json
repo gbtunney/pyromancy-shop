@@ -20,7 +20,7 @@
       "login_form_submit": "Enter",
       "signup_form_email_label": "Email",
       "signup_form_success": "We will send you an email right before we open!",
-      "admin_link_html": "Are you the store owner? <a href=\"\/admin\" class=\"text-link\">Log in here<\/a>",
+      "admin_link_html": "Are you the store owner? <a href=\"/admin\" class=\"text-link\">Log in here</a>",
       "password_link": "Enter using password",
       "powered_by_shopify_html": "This shop will be powered by {{ shopify }}"
     },
@@ -45,8 +45,8 @@
       "submit": "Search",
       "read_more": "Read more",
       "results_count_html": {
-        "one": "{{ count }} match for <strong>{{ terms }}<\/strong>",
-        "other": "{{ count }} matches for <strong>{{ terms }}<\/strong>"
+        "one": "{{ count }} match for <strong>{{ terms }}</strong>",
+        "other": "{{ count }} matches for <strong>{{ terms }}</strong>"
       },
       "products": "Products",
       "pages_and_articles": "Pages and articles"
@@ -160,7 +160,7 @@
       "city": "City",
       "country": "Country",
       "province": "Province",
-      "zip": "Postal\/Zip Code",
+      "zip": "Postal/Zip Code",
       "phone": "Phone",
       "set_default": "Set as default address",
       "add": "Add Address",
@@ -277,7 +277,7 @@
       "view": "View",
       "stock_available": "{{ count }} available",
       "collection_return": "Back to {{ collection }}",
-      "product_added_to_cart_html": "Item added to cart. <span>View cart and check out<\/span>.",
+      "product_added_to_cart_html": "Item added to cart. <span>View cart and check out</span>.",
       "stock_unavailable": "The item could not be added to your cart because there are not enough in stock."
     }
   },
@@ -303,8 +303,8 @@
       "get_directions": "Get directions",
       "address_error": "Error looking up that address",
       "address_no_results": "No results for that address",
-      "address_query_limit_html": "You have exceeded the Google API usage limit. Consider upgrading to a <a href=\"https:\/\/developers.google.com\/maps\/premium\/usage-limits\">Premium Plan<\/a>.",
-      "auth_error_html": "There was a problem authenticating your Google Maps account. Create and enable the <a href=\"https:\/\/developers.google.com\/maps\/documentation\/javascript\/get-api-key\">JavaScript API<\/a> and <a href=\"https:\/\/developers.google.com\/maps\/documentation\/geocoding\/get-api-key\">Geocoding API<\/a> permissions of your app."
+      "address_query_limit_html": "You have exceeded the Google API usage limit. Consider upgrading to a <a href=\"https://developers.google.com/maps/premium/usage-limits\">Premium Plan</a>.",
+      "auth_error_html": "There was a problem authenticating your Google Maps account. Create and enable the <a href=\"https://developers.google.com/maps/documentation/javascript/get-api-key\">JavaScript API</a> and <a href=\"https://developers.google.com/maps/documentation/geocoding/get-api-key\">Geocoding API</a> permissions of your app."
     }
   }
 }
