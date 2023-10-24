@@ -6,7 +6,7 @@
     "main": "index.js",
     "scripts": {
         "\n========== COMMIT >> ==========": "",
-                "commit": "pnpm exec cz",
+        "commit": "pnpm exec cz",
         "prepare:all": "pnpm run fix && pnpm run check && pnpm test",
         "\n========== BUILD >> ==========": "",
         "build": "pnpm -r build",
