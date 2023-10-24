@@ -12,3 +12,4 @@ npm-shrinkwrap.json
 yarn.lock
 package.lock
 pnpm-lock.yaml
+*.liquid

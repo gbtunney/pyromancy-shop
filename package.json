@@ -58,10 +58,13 @@
         "typescript": "^5.2.2"
     },
     "lint-staged": {
-        "*": "prettier --write",
+        "*{sh,ts,js,cjs,mjs,cts,json,yaml,yml,graphql,md}": "pnpm run prettier",
         "*.{ts,js,cjs,mjs}": "eslint -c .eslintrc.cjs"
     },
     "prettier": "@snailicide/build-config/prettier",
+    "eslintIgnore": [
+        "./themes/venture/assets/"
+    ],
     "config": {
         "eslint": {
             "extensions": "ts,js,cjs,mjs",
@@ -70,7 +73,7 @@
         },
         "prettier": {
             "extensions": "sh,ts,js,cjs,mjs,cts,json,yaml,yml,graphql,md",
-            "path": "*,./.husky/*,./.actions/*"
+            "path": "./*,./.husky/*,./.actions/*"
         },
         "commitizen": {
             "path": "@commitlint/cz-commitlint"
