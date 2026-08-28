@@ -4,18 +4,24 @@ on:
   workflow_dispatch:
     inputs:
       endpoint:
-        description: Printful API path to fetch
+        description: >-
+          Printful API path to fetch. Start with the product-template endpoint; you can
+          replace this later to inspect a different raw Printful resource without editing
+          the workflow.
         required: true
         default: v2/product-templates
         type: string
       api_base_url:
-        description: Printful API base URL
+        description: >-
+          Printful API host. Leave this alone unless Printful changes the API base URL or
+          we deliberately want to test another environment.
         required: true
         default: https://api.printful.com
         type: string
 
 jobs:
   dump:
+    name: Dump Printful raw API data
     uses: ./.github/workflows/call-printful-dump.yml
     with:
       endpoint: ${{ inputs.endpoint }}
