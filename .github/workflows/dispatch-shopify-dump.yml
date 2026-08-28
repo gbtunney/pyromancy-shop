@@ -1,0 +1,34 @@
+name: Dispatch Shopify API dump
+
+on:
+  workflow_dispatch:
+    inputs:
+      shop_domain:
+        description: Shopify store domain. Usually leave this as pyromancy.myshopify.com.
+        required: true
+        default: pyromancy.myshopify.com
+        type: string
+      dump_target:
+        description: Data group to dump once SHOPIFY_TOKEN is configured.
+        required: true
+        default: products
+        type: choice
+        options:
+          - products
+          - collections
+          - themes
+          - shop
+      api_version:
+        description: Shopify Admin API version. Usually leave the default alone.
+        required: true
+        default: 2026-07
+        type: string
+
+jobs:
+  dump:
+    uses: ./.github/workflows/call-shopify-dump.yml
+    with:
+      shop_domain: ${{ inputs.shop_domain }}
+      dump_target: ${{ inputs.dump_target }}
+      api_version: ${{ inputs.api_version }}
+    secrets: inherit
