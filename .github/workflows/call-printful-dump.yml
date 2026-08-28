@@ -3,17 +3,43 @@ name: z Call Printful API dump
 on:
   workflow_call:
     inputs:
-      endpoint:
-        description: Printful API path to fetch
-        required: true
+      include_product_templates:
+        required: false
+        default: true
+        type: boolean
+      include_template_details:
+        required: false
+        default: true
+        type: boolean
+      include_store_products:
+        required: false
+        default: true
+        type: boolean
+      include_orders:
+        required: false
+        default: true
+        type: boolean
+      include_files:
+        required: false
+        default: true
+        type: boolean
+      include_store_info:
+        required: false
+        default: true
+        type: boolean
+      include_catalog_products:
+        required: false
+        default: false
+        type: boolean
+      custom_endpoint:
+        required: false
+        default: ''
         type: string
       api_base_url:
-        description: Printful API base URL
         required: false
         default: https://api.printful.com
         type: string
       limit:
-        description: Maximum number of records to request from Printful
         required: false
         default: 100
         type: number
@@ -24,66 +50,166 @@ on:
 
 jobs:
   dump:
-    name: Fetch raw Printful JSON
+    name: Build Printful snapshot
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-      - name: Fetch Printful API response
-        id: fetch
+      - name: Fetch selected Printful datasets
         env:
           PRINTFUL_TOKEN: ${{ secrets.PRINTFUL_TOKEN }}
           PRINTFUL_API_BASE_URL: ${{ inputs.api_base_url }}
-          PRINTFUL_ENDPOINT: ${{ inputs.endpoint }}
           PRINTFUL_LIMIT: ${{ inputs.limit }}
+          INCLUDE_PRODUCT_TEMPLATES: ${{ inputs.include_product_templates }}
+          INCLUDE_TEMPLATE_DETAILS: ${{ inputs.include_template_details }}
+          INCLUDE_STORE_PRODUCTS: ${{ inputs.include_store_products }}
+          INCLUDE_ORDERS: ${{ inputs.include_orders }}
+          INCLUDE_FILES: ${{ inputs.include_files }}
+          INCLUDE_STORE_INFO: ${{ inputs.include_store_info }}
+          INCLUDE_CATALOG_PRODUCTS: ${{ inputs.include_catalog_products }}
+          CUSTOM_ENDPOINT: ${{ inputs.custom_endpoint }}
         shell: bash
         run: |
-          set -euo pipefail
-
-          mkdir -p printful-dump
+          set -uo pipefail
 
           base="${PRINTFUL_API_BASE_URL%/}"
-          endpoint="${PRINTFUL_ENDPOINT#/}"
+          root="printful-dump"
+          mkdir -p "$root"
+          printf 'dataset\tstatus\tcount\tnote\n' > "$root/summary.tsv"
 
-          if [[ "${endpoint}" == *"?"* ]]; then
-            url="${base}/${endpoint}&limit=${PRINTFUL_LIMIT}"
-          else
-            url="${base}/${endpoint}?limit=${PRINTFUL_LIMIT}"
+          fetch_json() {
+            local path="$1"
+            local output="$2"
+            local use_limit="${3:-true}"
+            local url="${base}/${path#/}"
+
+            if [[ "$use_limit" == "true" ]]; then
+              if [[ "$url" == *"?"* ]]; then
+                url="${url}&limit=${PRINTFUL_LIMIT}"
+              else
+                url="${url}?limit=${PRINTFUL_LIMIT}"
+              fi
+            fi
+
+            mkdir -p "$(dirname "$output")"
+            curl --silent --show-error --location \
+              --output "$output" \
+              --write-out '%{http_code}' \
+              --header "Authorization: Bearer ${PRINTFUL_TOKEN}" \
+              --header 'Accept: application/json' \
+              "$url" || true
+          }
+
+          summarize() {
+            local name="$1"
+            local status="$2"
+            local file="$3"
+            local note="${4:-}"
+            local count=''
+            if [[ "$status" =~ ^2 ]] && jq empty "$file" >/dev/null 2>&1; then
+              count="$(jq 'if (.data | type) == "array" then (.data | length) elif (.result | type) == "array" then (.result | length) else 1 end' "$file" 2>/dev/null || echo '?')"
+            fi
+            printf '%s\t%s\t%s\t%s\n' "$name" "$status" "$count" "$note" >> "$root/summary.tsv"
+          }
+
+          template_list="$root/product-templates/list.json"
+          if [[ "$INCLUDE_PRODUCT_TEMPLATES" == "true" || "$INCLUDE_TEMPLATE_DETAILS" == "true" ]]; then
+            status="$(fetch_json 'v2/product-templates' "$template_list" true)"
+            summarize 'product-templates' "$status" "$template_list"
+
+            if [[ "$INCLUDE_TEMPLATE_DETAILS" == "true" && "$status" =~ ^2 ]]; then
+              mkdir -p "$root/product-templates/details"
+              while IFS= read -r template_id; do
+                [[ -z "$template_id" || "$template_id" == "null" ]] && continue
+                detail="$root/product-templates/details/${template_id}.json"
+                detail_status="$(fetch_json "v2/product-templates/${template_id}" "$detail" false)"
+                summarize "product-template:${template_id}" "$detail_status" "$detail" 'detail including placements/design data'
+              done < <(jq -r '.data[]?.id // .result[]?.id' "$template_list" 2>/dev/null)
+            fi
           fi
 
-          echo "Fetching ${url}"
-
-          status="$({ curl \
-            --silent \
-            --show-error \
-            --location \
-            --output printful-dump/response.json \
-            --dump-header printful-dump/headers.txt \
-            --write-out '%{http_code}' \
-            --header "Authorization: Bearer ${PRINTFUL_TOKEN}" \
-            --header 'Accept: application/json' \
-            "${url}"; } || true)"
-
-          printf '%s\n' "${status}" > printful-dump/http-status.txt
-          printf '%s\n' "${url}" > printful-dump/endpoint.txt
-
-          if command -v jq >/dev/null 2>&1 && jq empty printful-dump/response.json >/dev/null 2>&1; then
-            jq . printful-dump/response.json > printful-dump/response.pretty.json
-          else
-            cp printful-dump/response.json printful-dump/response.pretty.json
+          if [[ "$INCLUDE_STORE_PRODUCTS" == "true" ]]; then
+            file="$root/store-products.json"
+            status="$(fetch_json 'v2/products' "$file" true)"
+            summarize 'store-products' "$status" "$file"
           fi
 
-          echo "HTTP ${status}"
-
-          if [[ ! "${status}" =~ ^2 ]]; then
-            echo 'Printful returned a non-success status. The raw response is still uploaded below for inspection.'
+          if [[ "$INCLUDE_FILES" == "true" ]]; then
+            file="$root/files.json"
+            status="$(fetch_json 'v2/files' "$file" true)"
+            summarize 'files' "$status" "$file"
           fi
 
-      - name: Upload raw Printful dump
+          if [[ "$INCLUDE_STORE_INFO" == "true" ]]; then
+            file="$root/stores.json"
+            status="$(fetch_json 'stores' "$file" false)"
+            summarize 'stores' "$status" "$file"
+          fi
+
+          if [[ "$INCLUDE_CATALOG_PRODUCTS" == "true" ]]; then
+            file="$root/catalog-products.json"
+            status="$(fetch_json 'v2/catalog-products' "$file" true)"
+            summarize 'catalog-products' "$status" "$file"
+          fi
+
+          if [[ "$INCLUDE_ORDERS" == "true" ]]; then
+            mkdir -p "$root/orders/items"
+            tmp_orders="$(mktemp)"
+            order_status="$(fetch_json 'v2/orders' "$tmp_orders" true)"
+
+            if [[ "$order_status" =~ ^2 ]] && jq empty "$tmp_orders" >/dev/null 2>&1; then
+              jq '{data: [(.data[]? | {id, external_id, store_id, status, created_at, updated_at})], paging, _links}' \
+                "$tmp_orders" > "$root/orders/orders.json"
+              summarize 'orders-safe' "$order_status" "$root/orders/orders.json" 'recipient/contact/address fields excluded'
+
+              while IFS= read -r order_id; do
+                [[ -z "$order_id" || "$order_id" == "null" ]] && continue
+                tmp_items="$(mktemp)"
+                item_status="$(fetch_json "v2/orders/${order_id}/order-items" "$tmp_items" false)"
+                safe_items="$root/orders/items/${order_id}.json"
+                if [[ "$item_status" =~ ^2 ]] && jq empty "$tmp_items" >/dev/null 2>&1; then
+                  jq '{data: [(.data[]? | {id, external_id, source, quantity, name, catalog_variant_id, product_id, variant_id, retail_price, placements, product_options})], _links}' \
+                    "$tmp_items" > "$safe_items"
+                  summarize "order-items:${order_id}" "$item_status" "$safe_items" 'merchandise fields only'
+                else
+                  printf '%s\t%s\t\t%s\n' "order-items:${order_id}" "$item_status" 'not saved because request failed' >> "$root/summary.tsv"
+                fi
+                rm -f "$tmp_items"
+              done < <(jq -r '.data[]?.id' "$tmp_orders" 2>/dev/null)
+            else
+              printf '%s\t%s\t\t%s\n' 'orders-safe' "$order_status" 'raw order response discarded' >> "$root/summary.tsv"
+            fi
+            rm -f "$tmp_orders"
+          fi
+
+          if [[ -n "${CUSTOM_ENDPOINT}" ]]; then
+            safe_name="$(printf '%s' "$CUSTOM_ENDPOINT" | tr '/?&=' '____' | tr -cd '[:alnum:]_.-')"
+            file="$root/custom-${safe_name}.json"
+            status="$(fetch_json "$CUSTOM_ENDPOINT" "$file" true)"
+            summarize "custom:${CUSTOM_ENDPOINT}" "$status" "$file"
+          fi
+
+          {
+            echo '# Printful snapshot summary'
+            echo
+            echo "Limit per list endpoint: ${PRINTFUL_LIMIT}"
+            echo
+            echo '| Dataset | HTTP | Count | Note |'
+            echo '|---|---:|---:|---|'
+            tail -n +2 "$root/summary.tsv" | while IFS=$'\t' read -r dataset status count note; do
+              printf '| %s | %s | %s | %s |\n' "$dataset" "$status" "$count" "$note"
+            done
+            echo
+            echo '> Order artifacts intentionally exclude recipient name, email, phone, and address data.'
+          } > "$root/summary.md"
+
+          cat "$root/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Printful snapshot
         uses: actions/upload-artifact@v4
         with:
-          name: printful-api-dump-${{ github.run_id }}
+          name: printful-snapshot-${{ github.run_id }}
           path: printful-dump/
           if-no-files-found: error
           retention-days: 14
