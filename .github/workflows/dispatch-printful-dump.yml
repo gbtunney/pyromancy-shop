@@ -11,6 +11,13 @@ on:
         required: true
         default: v2/product-templates
         type: string
+      limit:
+        description: >-
+          Maximum number of records to request from Printful. 100 is enough to pull the
+          current product-template list in a single response.
+        required: true
+        default: 100
+        type: number
       api_base_url:
         description: >-
           Printful API host. Leave this alone unless Printful changes the API base URL or
@@ -25,5 +32,6 @@ jobs:
     uses: ./.github/workflows/call-printful-dump.yml
     with:
       endpoint: ${{ inputs.endpoint }}
+      limit: ${{ inputs.limit }}
       api_base_url: ${{ inputs.api_base_url }}
     secrets: inherit
