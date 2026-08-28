@@ -12,6 +12,11 @@ on:
         required: false
         default: https://api.printful.com
         type: string
+      limit:
+        description: Maximum number of records to request from Printful
+        required: false
+        default: 100
+        type: number
     secrets:
       PRINTFUL_TOKEN:
         description: Printful private API token
@@ -31,6 +36,7 @@ jobs:
           PRINTFUL_TOKEN: ${{ secrets.PRINTFUL_TOKEN }}
           PRINTFUL_API_BASE_URL: ${{ inputs.api_base_url }}
           PRINTFUL_ENDPOINT: ${{ inputs.endpoint }}
+          PRINTFUL_LIMIT: ${{ inputs.limit }}
         shell: bash
         run: |
           set -euo pipefail
@@ -39,7 +45,12 @@ jobs:
 
           base="${PRINTFUL_API_BASE_URL%/}"
           endpoint="${PRINTFUL_ENDPOINT#/}"
-          url="${base}/${endpoint}"
+
+          if [[ "${endpoint}" == *"?"* ]]; then
+            url="${base}/${endpoint}&limit=${PRINTFUL_LIMIT}"
+          else
+            url="${base}/${endpoint}?limit=${PRINTFUL_LIMIT}"
+          fi
 
           echo "Fetching ${url}"
 
