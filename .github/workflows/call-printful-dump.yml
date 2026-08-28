@@ -156,15 +156,47 @@ jobs:
           if [[ "$INCLUDE_ORDERS" == "true" ]]; then
             mkdir -p "$root/orders/items"
             tmp_orders="$(mktemp)"
+            tmp_safe_orders="$(mktemp)"
             order_status="$(fetch_json 'v2/orders' "$tmp_orders" true)"
 
             if [[ "$order_status" =~ ^2 ]] && jq empty "$tmp_orders" >/dev/null 2>&1; then
-              jq '{data: [(.data[]? | {id, external_id, store_id, status, created_at, updated_at})], paging, _links}' \
-                "$tmp_orders" > "$root/orders/orders.json"
-              summarize 'orders-safe' "$order_status" "$root/orders/orders.json" 'recipient/contact/address fields excluded'
-
               while IFS= read -r order_id; do
                 [[ -z "$order_id" || "$order_id" == "null" ]] && continue
+
+                tmp_detail="$(mktemp)"
+                detail_status="$(fetch_json "v2/orders/${order_id}" "$tmp_detail" false)"
+                if [[ "$detail_status" =~ ^2 ]] && jq empty "$tmp_detail" >/dev/null 2>&1; then
+                  recipient_identity="$(jq -r '
+                    (.data.recipient // .result.recipient // .recipient // {})
+                    | [(.name // ""), (.email // ""), (.phone // ""), (.address1 // ""), (.zip // "")]
+                    | map(ascii_downcase)
+                    | join("|")
+                  ' "$tmp_detail" 2>/dev/null)"
+
+                  recipient_key=''
+                  if [[ -n "$recipient_identity" && "$recipient_identity" != '||||' ]]; then
+                    recipient_key="$(printf '%s' "$recipient_identity" | sha256sum | cut -c1-16)"
+                  fi
+
+                  jq --arg recipient_key "$recipient_key" '
+                    (.data // .result // .) as $o
+                    | {
+                        id: $o.id,
+                        external_id: $o.external_id,
+                        store_id: $o.store_id,
+                        shipping: $o.shipping,
+                        status: $o.status,
+                        created_at: $o.created_at,
+                        updated_at: $o.updated_at,
+                        recipient_key: (if $recipient_key == "" then null else $recipient_key end),
+                        origin_hint: (if (($o.external_id // "") | tostring | length) > 0 then "store-linked-or-external" else "manual-or-unknown" end)
+                      }
+                  ' "$tmp_detail" >> "$tmp_safe_orders"
+                else
+                  jq --argjson oid "$order_id" '{id: $oid, recipient_key: null, origin_hint: "unknown"}' >> "$tmp_safe_orders"
+                fi
+                rm -f "$tmp_detail"
+
                 tmp_items="$(mktemp)"
                 item_status="$(fetch_json "v2/orders/${order_id}/order-items" "$tmp_items" false)"
                 safe_items="$root/orders/items/${order_id}.json"
@@ -177,10 +209,13 @@ jobs:
                 fi
                 rm -f "$tmp_items"
               done < <(jq -r '.data[]?.id' "$tmp_orders" 2>/dev/null)
+
+              jq -s '{data: .}' "$tmp_safe_orders" > "$root/orders/orders.json"
+              summarize 'orders-safe' "$order_status" "$root/orders/orders.json" 'anonymous recipient_key retained; recipient/contact/address fields excluded'
             else
               printf '%s\t%s\t\t%s\n' 'orders-safe' "$order_status" 'raw order response discarded' >> "$root/summary.tsv"
             fi
-            rm -f "$tmp_orders"
+            rm -f "$tmp_orders" "$tmp_safe_orders"
           fi
 
           if [[ -n "${CUSTOM_ENDPOINT}" ]]; then
@@ -201,7 +236,7 @@ jobs:
               printf '| %s | %s | %s | %s |\n' "$dataset" "$status" "$count" "$note"
             done
             echo
-            echo '> Order artifacts intentionally exclude recipient name, email, phone, and address data.'
+            echo '> Order artifacts exclude recipient name, email, phone, and address data. A stable anonymous recipient_key is retained so repeated orders to the same recipient can be recognized without storing their identity.'
           } > "$root/summary.md"
 
           cat "$root/summary.md" >> "$GITHUB_STEP_SUMMARY"
