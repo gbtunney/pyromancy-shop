@@ -1,0 +1,52 @@
+name: Call Shopify API dump
+
+on:
+  workflow_call:
+    inputs:
+      shop_domain:
+        description: Shopify store domain (for example pyromancy.myshopify.com)
+        required: true
+        type: string
+      api_version:
+        description: Shopify Admin API version to use
+        required: false
+        default: 2026-07
+        type: string
+      dump_target:
+        description: What to dump once the token is configured
+        required: false
+        default: products
+        type: string
+    secrets:
+      SHOPIFY_TOKEN:
+        description: Shopify Admin API access token
+        required: false
+
+jobs:
+  placeholder:
+    name: Shopify dump placeholder
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Show configuration status
+        env:
+          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+          SHOP_DOMAIN: ${{ inputs.shop_domain }}
+          API_VERSION: ${{ inputs.api_version }}
+          DUMP_TARGET: ${{ inputs.dump_target }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Shop: ${SHOP_DOMAIN}"
+          echo "API version: ${API_VERSION}"
+          echo "Dump target: ${DUMP_TARGET}"
+
+          if [[ -z "${SHOPIFY_TOKEN:-}" ]]; then
+            echo "SHOPIFY_TOKEN is not configured yet. This workflow is intentionally a safe placeholder for now."
+            exit 0
+          fi
+
+          echo "SHOPIFY_TOKEN is configured. The real Shopify dump implementation can now replace this placeholder."

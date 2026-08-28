@@ -1,0 +1,78 @@
+name: Call Printful API dump
+
+on:
+  workflow_call:
+    inputs:
+      endpoint:
+        description: Printful API path to fetch
+        required: true
+        type: string
+      api_base_url:
+        description: Printful API base URL
+        required: false
+        default: https://api.printful.com
+        type: string
+    secrets:
+      PRINTFUL_TOKEN:
+        description: Printful private API token
+        required: true
+
+jobs:
+  dump:
+    name: Fetch raw Printful JSON
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Fetch Printful API response
+        id: fetch
+        env:
+          PRINTFUL_TOKEN: ${{ secrets.PRINTFUL_TOKEN }}
+          PRINTFUL_API_BASE_URL: ${{ inputs.api_base_url }}
+          PRINTFUL_ENDPOINT: ${{ inputs.endpoint }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p printful-dump
+
+          base="${PRINTFUL_API_BASE_URL%/}"
+          endpoint="${PRINTFUL_ENDPOINT#/}"
+          url="${base}/${endpoint}"
+
+          echo "Fetching ${url}"
+
+          status="$({ curl \
+            --silent \
+            --show-error \
+            --location \
+            --output printful-dump/response.json \
+            --dump-header printful-dump/headers.txt \
+            --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${PRINTFUL_TOKEN}" \
+            --header 'Accept: application/json' \
+            "${url}"; } || true)"
+
+          printf '%s\n' "${status}" > printful-dump/http-status.txt
+          printf '%s\n' "${url}" > printful-dump/endpoint.txt
+
+          if command -v jq >/dev/null 2>&1 && jq empty printful-dump/response.json >/dev/null 2>&1; then
+            jq . printful-dump/response.json > printful-dump/response.pretty.json
+          else
+            cp printful-dump/response.json printful-dump/response.pretty.json
+          fi
+
+          echo "HTTP ${status}"
+
+          if [[ ! "${status}" =~ ^2 ]]; then
+            echo 'Printful returned a non-success status. The raw response is still uploaded below for inspection.'
+          fi
+
+      - name: Upload raw Printful dump
+        uses: actions/upload-artifact@v4
+        with:
+          name: printful-api-dump-${{ github.run_id }}
+          path: printful-dump/
+          if-no-files-found: error
+          retention-days: 14
