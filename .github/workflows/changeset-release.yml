@@ -1,8 +1,8 @@
 name: Build
 
 on:
-    push:
-    pull_request:
+    workflow_dispatch:
+
 jobs:
     build:
         name: Build and Commit
@@ -12,15 +12,13 @@ jobs:
         steps:
             - name: Checkout Repo
               uses: actions/checkout@v4
-              with:
-                  ref: ${{ github.head_ref }}
 
             - name: Setup Node.js environment 🛎️
               uses: actions/setup-node@v3.8.1
               with:
                   node-version: '18.7.0'
 
-            - name: Install pnpm 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+            - name: Install pnpm 🔧
               run: |
                   npm install -g pnpm
                   pnpm install
