@@ -1,0 +1,23 @@
+name: Dispatch Printful API dump
+
+on:
+  workflow_dispatch:
+    inputs:
+      endpoint:
+        description: Printful API path to fetch
+        required: true
+        default: v2/product-templates
+        type: string
+      api_base_url:
+        description: Printful API base URL
+        required: true
+        default: https://api.printful.com
+        type: string
+
+jobs:
+  dump:
+    uses: ./.github/workflows/call-printful-dump.yml
+    with:
+      endpoint: ${{ inputs.endpoint }}
+      api_base_url: ${{ inputs.api_base_url }}
+    secrets: inherit
