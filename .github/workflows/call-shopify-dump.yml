@@ -1,4 +1,4 @@
-name: Call Shopify API dump
+name: z Call Shopify API dump
 
 on:
   workflow_call:
