@@ -46,8 +46,8 @@ on:
       limit:
         description: Maximum records requested from each list endpoint
         required: true
-        default: 100
-        type: number
+        default: '100'
+        type: string
       api_base_url:
         description: Printful API host; normally leave unchanged
         required: true

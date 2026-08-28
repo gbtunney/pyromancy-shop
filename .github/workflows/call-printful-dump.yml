@@ -41,8 +41,8 @@ on:
         type: string
       limit:
         required: false
-        default: 100
-        type: number
+        default: '100'
+        type: string
     secrets:
       PRINTFUL_TOKEN:
         description: Printful private API token
@@ -230,11 +230,57 @@ jobs:
             echo
             echo "Limit per list endpoint: ${PRINTFUL_LIMIT}"
             echo
-            echo '| Dataset | HTTP | Count | Note |'
-            echo '|---|---:|---:|---|'
-            tail -n +2 "$root/summary.tsv" | while IFS=$'\t' read -r dataset status count note; do
-              printf '| %s | %s | %s | %s |\n' "$dataset" "$status" "$count" "$note"
-            done
+            echo '| Dataset | Count | Note |'
+            echo '|---|---:|---|'
+
+            while IFS=$'\t' read -r dataset status count note; do
+              [[ "$dataset" == 'dataset' ]] && continue
+              [[ "$dataset" == product-template:* ]] && continue
+              [[ "$dataset" == order-items:* ]] && continue
+              [[ ! "$status" =~ ^2 ]] && continue
+              printf '| %s | %s | %s |\n' "$dataset" "$count" "$note"
+            done < "$root/summary.tsv"
+
+            template_total="$(awk -F '\t' '$1 ~ /^product-template:/ {n++} END {print n+0}' "$root/summary.tsv")"
+            template_ok="$(awk -F '\t' '$1 ~ /^product-template:/ && $2 ~ /^2/ {n++} END {print n+0}' "$root/summary.tsv")"
+            if [[ "$template_total" -gt 0 ]]; then
+              printf '| template-details | %s/%s | fetched per template |\n' "$template_ok" "$template_total"
+            fi
+
+            order_items_total="$(awk -F '\t' '$1 ~ /^order-items:/ {n++} END {print n+0}' "$root/summary.tsv")"
+            order_items_ok="$(awk -F '\t' '$1 ~ /^order-items:/ && $2 ~ /^2/ {n++} END {print n+0}' "$root/summary.tsv")"
+            if [[ "$order_items_total" -gt 0 ]]; then
+              printf '| order-item sets | %s/%s | recovered per order |\n' "$order_items_ok" "$order_items_total"
+            fi
+
+            top_level_bad="$(awk -F '\t' 'NR > 1 && $1 !~ /^product-template:/ && $1 !~ /^order-items:/ && $2 !~ /^2/ {n++} END {print n+0}' "$root/summary.tsv")"
+            template_bad=$((template_total - template_ok))
+            order_items_bad=$((order_items_total - order_items_ok))
+
+            if [[ "$top_level_bad" -gt 0 || "$template_bad" -gt 0 || "$order_items_bad" -gt 0 ]]; then
+              echo
+              echo '## Warnings / failures'
+
+              while IFS=$'\t' read -r dataset status count note; do
+                [[ "$dataset" == 'dataset' ]] && continue
+                [[ "$dataset" == product-template:* ]] && continue
+                [[ "$dataset" == order-items:* ]] && continue
+                [[ "$status" =~ ^2 ]] && continue
+                if [[ -n "$note" ]]; then
+                  printf -- '- `%s` — HTTP %s — %s\n' "$dataset" "$status" "$note"
+                else
+                  printf -- '- `%s` — HTTP %s\n' "$dataset" "$status"
+                fi
+              done < "$root/summary.tsv"
+
+              if [[ "$template_bad" -gt 0 ]]; then
+                printf -- '- template details — %s of %s failed\n' "$template_bad" "$template_total"
+              fi
+              if [[ "$order_items_bad" -gt 0 ]]; then
+                printf -- '- order-item sets — %s of %s failed\n' "$order_items_bad" "$order_items_total"
+              fi
+            fi
+
             echo
             echo '> Order artifacts exclude recipient name, email, phone, and address data. A stable anonymous recipient_key is retained so repeated orders to the same recipient can be recognized without storing their identity.'
           } > "$root/summary.md"
