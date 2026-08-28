@@ -41,8 +41,8 @@ on:
         type: string
       limit:
         required: false
-        default: 100
-        type: number
+        default: '100'
+        type: string
     secrets:
       PRINTFUL_TOKEN:
         description: Printful private API token
