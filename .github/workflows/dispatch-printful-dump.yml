@@ -3,25 +3,53 @@ name: Dispatch Printful API dump
 on:
   workflow_dispatch:
     inputs:
-      endpoint:
-        description: >-
-          Printful API path to fetch. Start with the product-template endpoint; you can
-          replace this later to inspect a different raw Printful resource without editing
-          the workflow.
+      include_product_templates:
+        description: Product templates (design + garment combinations)
         required: true
-        default: v2/product-templates
+        default: true
+        type: boolean
+      include_template_details:
+        description: Fetch detail for every product template (artwork / placement data)
+        required: true
+        default: true
+        type: boolean
+      include_store_products:
+        description: Store products currently synced in Printful
+        required: true
+        default: true
+        type: boolean
+      include_orders:
+        description: Orders, useful for identifying historical samples and purchases
+        required: true
+        default: true
+        type: boolean
+      include_files:
+        description: Files / artwork known to Printful
+        required: true
+        default: true
+        type: boolean
+      include_store_info:
+        description: Store/account information
+        required: true
+        default: true
+        type: boolean
+      include_catalog_products:
+        description: General Printful catalog products (large; usually not needed)
+        required: true
+        default: false
+        type: boolean
+      custom_endpoint:
+        description: Optional extra API path to include, e.g. v2/some-resource
+        required: false
+        default: ''
         type: string
       limit:
-        description: >-
-          Maximum number of records to request from Printful. 100 is enough to pull the
-          current product-template list in a single response.
+        description: Maximum records requested from each list endpoint
         required: true
         default: 100
         type: number
       api_base_url:
-        description: >-
-          Printful API host. Leave this alone unless Printful changes the API base URL or
-          we deliberately want to test another environment.
+        description: Printful API host; normally leave unchanged
         required: true
         default: https://api.printful.com
         type: string
@@ -31,7 +59,14 @@ jobs:
     name: Dump Printful raw API data
     uses: ./.github/workflows/call-printful-dump.yml
     with:
-      endpoint: ${{ inputs.endpoint }}
+      include_product_templates: ${{ inputs.include_product_templates }}
+      include_template_details: ${{ inputs.include_template_details }}
+      include_store_products: ${{ inputs.include_store_products }}
+      include_orders: ${{ inputs.include_orders }}
+      include_files: ${{ inputs.include_files }}
+      include_store_info: ${{ inputs.include_store_info }}
+      include_catalog_products: ${{ inputs.include_catalog_products }}
+      custom_endpoint: ${{ inputs.custom_endpoint }}
       limit: ${{ inputs.limit }}
       api_base_url: ${{ inputs.api_base_url }}
     secrets: inherit
